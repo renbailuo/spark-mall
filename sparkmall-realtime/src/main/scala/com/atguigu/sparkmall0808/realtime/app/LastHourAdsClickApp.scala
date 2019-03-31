@@ -47,21 +47,12 @@ object LastHourAdsClickApp {
       (ads, hourMinusCountJson)
     }
     hourMinusCountJsonGroupbyAdsDStream.foreachRDD(rdd=> {
-
       val hourMinusCountJsonArray: Array[(String, String)] = rdd.collect()
-
       val jedisClient: Jedis = RedisUtil.getJedisClient
       import collection.JavaConversions._
       jedisClient.hmset("last_hour_ads_click",hourMinusCountJsonArray.toMap)
       jedisClient.close()
     }
-
     )
-
-
-
-
-
   }
-
 }

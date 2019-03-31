@@ -6,8 +6,7 @@ import com.atguigu.sparkmall0808.offline.bean.CategoryCountInfo
 import com.atguigu.sparkmall0808.offline.utils.CategoryCountAccumulator
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 object CategoryTop10App {
     def statCategoryTop10(userActionRDD: RDD[UserVisitAction] ,sparkSession: SparkSession,taskId:String) ={
@@ -59,7 +58,6 @@ object CategoryTop10App {
           true
         }
       )
-
 //        6 截取前10
       val top10CategoryList: List[CategoryCountInfo] = sortedCategoryCountInfoList.take(10)
 //        7  调整结构 把 list 中的CategoryCountInfo 转成Array[Any]便于数据库插入
@@ -70,6 +68,5 @@ object CategoryTop10App {
       JdbcUtil.executeBatchUpdate("insert into category_top10 values (?,?,?,?,?)",top10CategoryParam)
       //9 给 需求四用
       top10CategoryList
-
     }
 }

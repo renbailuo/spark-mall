@@ -8,7 +8,7 @@ import com.alibaba.druid.pool.DruidDataSourceFactory
 
 object JdbcUtil {
 
-  var dataSource: DataSource = init()
+  var dataSource: DataSource = init
 
   def init() = {
     val properties = new Properties()

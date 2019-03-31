@@ -11,7 +11,6 @@
 
     <artifactId>sparkmall-realtime</artifactId>
     <dependencies>
-
         <dependency>
             <groupId>com.atguigu.sparkmall0808</groupId>
             <artifactId>sparkmall-common</artifactId>
@@ -30,7 +29,6 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-hive_2.11</artifactId>
         </dependency>
-
     </dependencies>
 
 

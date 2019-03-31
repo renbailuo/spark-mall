@@ -38,6 +38,7 @@ object SessionStatApp {
             maxTime = actionTimeMs
           }
         }
+        //session步长
         val sessionStep: Int = actionItr.size
         //session时长
         var sessionVisitLength: Long = maxTime - minTime
@@ -64,13 +65,14 @@ object SessionStatApp {
       val visitStep_5_gt:Long = sessionCountMap.getOrElse("visitStep_5_gt",0)
       val session_count:Long = sessionCountMap.getOrElse("session_count",0)
       //    5  求占比 =》 符合条件的计数 除以 总数
-      val visitLength_10_le_ratio:Double = Math.round( (visitLength_10_le.toDouble/session_count*1000))/10D
-      val visitLength_10_gt_ratio:Double = Math.round( (visitLength_10_gt.toDouble/session_count*1000))/10D
-      val visitStep_5_le_ratio:Double = Math.round( (visitStep_5_le.toDouble/session_count*1000))/10D
-      val visitStep_5_gt_ratio:Double = Math.round( (visitStep_5_gt.toDouble/session_count*1000))/10D
 
-      println(s"visitLength_10_le_ratio = ${visitLength_10_le_ratio}")
-      println(s"visitStep_5_le_ratio = ${visitStep_5_le_ratio}")
+      val visitLength_10_le_ratio:Double = Math.round( visitLength_10_le.toDouble/session_count*1000)/10D
+      val visitLength_10_gt_ratio:Double = Math.round( visitLength_10_gt.toDouble/session_count*1000)/10D
+      val visitStep_5_le_ratio:Double = Math.round( visitStep_5_le.toDouble/session_count*1000)/10D
+      val visitStep_5_gt_ratio:Double = Math.round( visitStep_5_gt.toDouble/session_count*1000)/10D
+
+      println(s"visitLength_10_le_ratio = $visitLength_10_le_ratio")
+      println(s"visitStep_5_le_ratio = $visitStep_5_le_ratio")
 
       //    6  结果保存到mysql
       //组织参数

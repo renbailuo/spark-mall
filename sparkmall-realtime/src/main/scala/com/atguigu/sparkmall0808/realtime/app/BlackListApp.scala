@@ -10,7 +10,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.DStream
-import redis.clients.jedis.Jedis
 
 object BlackListApp {
 
@@ -23,14 +22,12 @@ object BlackListApp {
 //  redis    用hash类型存储   结构：    userId_ads_date : count
 //  hincrby( k,n, f,) 给某个key的某个field的值增加n
    def checkUserToBlackList(adsClickInfoDStream: DStream[AdsInfo] ): Unit ={
-
        //连接1  driver
        // 注意：不能把在driver中建立的连接发送给executor中执行，会报序列化错误
       adsClickInfoDStream.foreachRDD{rdd=>
         //连接2     driver
-
         rdd.foreachPartition{adsItr=>
-          //每个分区 单独执行  executor
+          //在executor中 ,按照每个分区执行
           val jedis =RedisUtil.getJedisClient  //在这里建立连接可以节省连接建立次数，节省开销
           for (adsInfo <- adsItr ) {
             //  hincrby( k,f,n) 给某个key的某个field的值增加n
@@ -46,12 +43,8 @@ object BlackListApp {
             }
           }
           jedis.close()
-
         }
-
-
       }
-
      }
     def checkUserFromBlackList(adsClickInfoDStream: DStream[AdsInfo],sparkContext: SparkContext): DStream[AdsInfo] ={
 //      val jedis = new Jedis("hadoop1",6379)
@@ -59,10 +52,14 @@ object BlackListApp {
 //      val blacklistBC: Broadcast[util.Set[String]] = sparkContext.broadcast(blacklist)  //此处程序只会执行一次 ，数据无法动态随时间变化
       val adsClickInfoFilteredDStream: DStream[AdsInfo] = adsClickInfoDStream.transform { rdd =>
         // driver中执行，每隔一个时间周期执行一次
+        //获取现有的黑名单
         val jedis = RedisUtil.getJedisClient
         val blacklist: util.Set[String] = jedis.smembers("blacklist")
+        //将Driver端的黑名单用户集合用广播变量发送
         val blacklistBC: Broadcast[util.Set[String]] = sparkContext.broadcast(blacklist)
+        //接收广播变量 通过判断过滤
         val filterRDD: RDD[AdsInfo] = rdd.filter { adsInfo => //executor
+          //如果包含则返回false
           !blacklistBC.value.contains(adsInfo.userId)
         }
        jedis.close

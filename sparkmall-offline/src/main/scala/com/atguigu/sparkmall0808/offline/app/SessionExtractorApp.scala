@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{SaveMode, SparkSession}
 
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 object SessionExtractorApp {
@@ -93,8 +93,6 @@ object SessionExtractorApp {
        .option("user", config.getString("jdbc.user"))
        .option("password", config.getString("jdbc.password"))
        .option("dbtable", "random_session_info").mode(SaveMode.Append).save()
-
-
    }
 
 

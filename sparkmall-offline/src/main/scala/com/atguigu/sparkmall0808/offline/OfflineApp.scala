@@ -1,31 +1,22 @@
 package com.atguigu.sparkmall0808.offline
 
-import java.text.SimpleDateFormat
-import java.util.{Date, UUID}
+import java.util.UUID
 
 import com.alibaba.fastjson.{JSON, JSONObject}
-import com.atguigu.sparkmall0808.common.{ConfigUtil, JdbcUtil}
+import com.atguigu.sparkmall0808.common.ConfigUtil
 import com.atguigu.sparkmall0808.common.bean.UserVisitAction
 import com.atguigu.sparkmall0808.offline.app._
-import com.atguigu.sparkmall0808.offline.bean.{CategoryCountInfo, SessionInfo}
-import com.atguigu.sparkmall0808.offline.utils.SessionAccumulator
+import com.atguigu.sparkmall0808.offline.bean.CategoryCountInfo
 import org.apache.commons.configuration2.FileBasedConfiguration
+import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, sql}
-import org.apache.spark.sql.{SaveMode, SparkSession}
-
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
+import org.apache.spark.sql.SparkSession
 
 object OfflineApp {
-
-
 
   def main(args: Array[String]): Unit = {
     val sparkConf: SparkConf = new SparkConf().setAppName("offline").setMaster("local[*]")
     val sparkSession = SparkSession.builder().config(sparkConf).enableHiveSupport().getOrCreate()
-
 
     val taskId: String = UUID.randomUUID().toString
 
@@ -38,7 +29,7 @@ object OfflineApp {
     println(conditionJsonObj.getString("startDate"))
     //1 根据过滤条件 取出符合的日志RDD集合  成为RDD[UserVisitAction]
     val userActionRDD: RDD[UserVisitAction] = readUserVisitActionRDD(sparkSession, conditionJsonObj)
-    userActionRDD.cache()
+
     //    2 以sessionId为key 进行聚合   =》 RDD[sessionId,Iterable[UserVisitAction]]
     val sessionActionsRDD: RDD[(String, Iterable[UserVisitAction])] = userActionRDD.map { userAction => (userAction.session_id, userAction) }.groupByKey()
     //需求一
@@ -79,12 +70,11 @@ object OfflineApp {
       sql += " and  u.age <=" + conditionJsonObj.getString("endAge")
     }
     println(sql)
-    sparkSession.sql("use sparkmall0808");
+    sparkSession.sql("use sparkmall0808")
 
     import sparkSession.implicits._
     //  sparkSession.sql(sql+ " limit 50").show
-    sparkSession.sql(sql).as[UserVisitAction].rdd
-
+    val rdd: RDD[UserVisitAction] = sparkSession.sql(sql).as[UserVisitAction].rdd
+    rdd
   }
-
 }
